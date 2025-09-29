@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'views/viewRouter.dart';
 import 'routes/router.dart';
+import 'services/auth/authService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await dotenv.load(fileName: '.env');
-  final name = await AppRouter.user.getName();
 
-  runApp(MyApp(initialRoute: name == null ? '/name' : '/chats'));
+  final initialRoute = AuthService.isLoggedIn ? '/chats' : '/login';
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {

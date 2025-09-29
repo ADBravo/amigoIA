@@ -3,6 +3,7 @@ import '../../../services/db/dbService.dart';
 import '../../../services/ia/iaService.dart';
 import '../../../middleware/limiter.dart';
 import '../../../routes/router.dart';
+import '../../../services/auth/authService.dart';
 
 class MessageController {
   final IAService _ia = IAService();
@@ -41,12 +42,18 @@ class MessageController {
       'timestamp': now.toIso8601String(),
     });
 
-    final user = await AppRouter.user.getName() ?? 'amigo';
+    if (AuthService.userId == null) return;
+
+    final userModel = await AppRouter.user.getById(AuthService.userId!);
+    final userName = userModel?.name ?? 'amigo';
+    final userGender = userModel?.gender ?? 'Otro';
+
     final contextMessages = await getMessages(chatId);
     final contexto = contextMessages
         .map((m) => '${m.sender}: ${m.content}')
         .join('\n');
-    final aiResponse = await _ia.responder(user, userMessage, contexto);
+
+    final aiResponse = await _ia.responder(userName, userGender, userMessage, contexto);
 
     await db.insert('message', {
       'chatId': chatId,

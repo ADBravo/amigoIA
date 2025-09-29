@@ -21,17 +21,71 @@ class DBService {
       return await getDatabaseFactory().openDatabase(path, options: OpenDatabaseOptions(
         version: 1,
         onCreate: (db, version) async {
-          await db.execute('CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT);');
-          await db.execute('CREATE TABLE chat (id INTEGER PRIMARY KEY, title TEXT, createdAt TEXT);');
-          await db.execute('CREATE TABLE message (id INTEGER PRIMARY KEY, chatId INTEGER, sender TEXT, content TEXT, timestamp TEXT);');
+          await db.execute('''
+            CREATE TABLE user (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              email TEXT UNIQUE NOT NULL,
+              password TEXT NOT NULL,
+              name TEXT,
+              gender TEXT
+            );
+          ''');
+
+          await db.execute('''
+            CREATE TABLE chat (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              userId INTEGER NOT NULL,
+              title TEXT,
+              createdAt TEXT,
+              FOREIGN KEY(userId) REFERENCES user(id)
+            );
+          ''');
+
+          await db.execute('''
+            CREATE TABLE message (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              chatId INTEGER NOT NULL,
+              sender TEXT,
+              content TEXT,
+              timestamp TEXT,
+              FOREIGN KEY(chatId) REFERENCES chat(id)
+            );
+          ''');
         },
       ));
     } else {
       // Android/iOS
       return await openDatabase(path, version: 1, onCreate: (db, version) async {
-        await db.execute('CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT);');
-        await db.execute('CREATE TABLE chat (id INTEGER PRIMARY KEY, title TEXT, createdAt TEXT);');
-        await db.execute('CREATE TABLE message (id INTEGER PRIMARY KEY, chatId INTEGER, sender TEXT, content TEXT, timestamp TEXT);');
+        await db.execute('''
+          CREATE TABLE user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            name TEXT,
+            gender TEXT
+          );
+        ''');
+
+        await db.execute('''
+          CREATE TABLE chat (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER NOT NULL,
+            title TEXT,
+            createdAt TEXT,
+            FOREIGN KEY(userId) REFERENCES user(id)
+          );
+        ''');
+
+        await db.execute('''
+          CREATE TABLE message (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chatId INTEGER NOT NULL,
+            sender TEXT,
+            content TEXT,
+            timestamp TEXT,
+            FOREIGN KEY(chatId) REFERENCES chat(id)
+          );
+        ''');
       });
     }
   }

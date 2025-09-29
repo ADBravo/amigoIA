@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../routes/router.dart';
 import '../../models/chat/chatModel.dart';
+import '../../services/auth/authService.dart';
 
 class ChatListView extends StatefulWidget {
   @override
@@ -13,10 +14,20 @@ class _ChatListViewState extends State<ChatListView> {
 
   Future<void> _loadChats() async {
     final result = await AppRouter.chat.getChats();
-    final name = await AppRouter.user.getName();
+    final user = await AppRouter.user.getById(AuthService.userId!);
+
+    final nombre = user?.name ?? '';
+    final genero = user?.gender ?? 'Otro';
+
+    final saludo = genero == 'Femenino'
+        ? 'Hola, amiga 👋'
+        : genero == 'Masculino'
+        ? 'Hola, amigo 👋'
+        : 'Hola 👋';
+
     setState(() {
       chats = result;
-      userName = name ?? '';
+      userName = '$saludo $nombre';
     });
   }
 
@@ -67,14 +78,23 @@ class _ChatListViewState extends State<ChatListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(userName.isNotEmpty ? 'Hola, $userName 👋' : 'Tus chats'),
+        title: Text(userName.isNotEmpty ? userName : 'Tus chats'),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.edit),
+            tooltip: 'Editar nombre',
             onPressed: () async {
-              await Navigator.pushNamed(context, '/settings');
-              final name = await AppRouter.user.getName();
-              setState(() => userName = name ?? '');
+              await Navigator.pushNamed(context, '/edit-name');
+              final user = await AppRouter.user.getById(AuthService.userId!);
+              setState(() => userName = user?.name ?? '');
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () {
+              AuthService.logout();
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],

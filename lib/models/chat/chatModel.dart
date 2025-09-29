@@ -12,8 +12,10 @@ class ChatModel {
   };
 
   factory ChatModel.fromMap(Map<String, dynamic> map) => ChatModel(
-    id: map['id'],
-    title: map['title'],
+    id: map['id'] is int
+        ? map['id'] as int
+        : int.tryParse(map['id']?.toString() ?? '') ?? 0,
+    title: map['title']?.toString() ?? '',
     createdAt: DateTime.parse(map['createdAt']),
   );
 }

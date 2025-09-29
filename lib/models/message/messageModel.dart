@@ -22,10 +22,14 @@ class MessageModel {
   };
 
   factory MessageModel.fromMap(Map<String, dynamic> map) => MessageModel(
-    id: map['id'],
-    chatId: map['chatId'],
-    sender: map['sender'],
-    content: map['content'],
+    id: map['id'] is int
+        ? map['id'] as int
+        : int.tryParse(map['id']?.toString() ?? '') ?? 0,
+    chatId: map['chatId'] is int
+        ? map['chatId'] as int
+        : int.tryParse(map['chatId']?.toString() ?? '') ?? 0,
+    sender: map['sender']?.toString() ?? '',
+    content: map['content']?.toString() ?? '',
     timestamp: DateTime.parse(map['timestamp']),
   );
 }

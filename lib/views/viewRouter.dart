@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
-import 'pages/name_input_view.dart';
+import 'pages/login_view.dart';
+import 'pages/register_view.dart';
 import 'pages/chat_list_view.dart';
 import 'pages/chat_detail_view.dart';
-import 'pages/settings_view.dart';
+import 'pages/name_edit_view.dart';
+import '../middleware/authMiddleware.dart';
 
 Route<dynamic>? viewRouter(RouteSettings settings) {
   final uri = Uri.parse(settings.name ?? '');
   if (uri.pathSegments.isEmpty) return null;
 
   switch (uri.pathSegments.first) {
-    case 'name':
-      return MaterialPageRoute(builder: (_) => NameInputView());
+    case 'login':
+      return MaterialPageRoute(builder: (_) => LoginView());
+    case 'register':
+      return MaterialPageRoute(builder: (_) => RegisterView());
     case 'chats':
-      return MaterialPageRoute(builder: (_) => ChatListView());
+      return protectedRoute(settings, () => ChatListView());
     case 'chat':
       if (uri.pathSegments.length >= 2) {
         final chatId = int.tryParse(uri.pathSegments[1]);
         if (chatId != null) {
-          return MaterialPageRoute(builder: (_) => ChatDetailView(chatId: chatId));
+          return protectedRoute(settings, () => ChatDetailView(chatId: chatId));
         }
       }
       break;
-    case 'settings':
-      return MaterialPageRoute(builder: (_) => SettingsView());
+    case 'edit-name':
+      return protectedRoute(settings, () => NameEditView());
   }
 
   return MaterialPageRoute(
-    builder: (_) => Scaffold(body: Center(child: Text('Ruta no encontrada'))),
+    builder: (_) => Scaffold(
+      body: Center(
+        child: Text('Ruta no encontrada'),
+      ),
+    ),
   );
 }
